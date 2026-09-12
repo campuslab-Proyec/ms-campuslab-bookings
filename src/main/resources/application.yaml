@@ -1,3 +1,42 @@
 spring:
   application:
     name: ms-campuslab-bookings
+
+    server:
+      port: 8081
+
+    spring:
+      datasource:
+        url: jdbc:oracle:thin:@//oracle-db:1521/XEPDB1
+        username: bookings_user
+        password: ${DB_PASSWORD}
+        driver-class-name: oracle.jdbc.OracleDriver
+      jpa:
+        database-platform: org.hibernate.dialect.OracleDialect
+        hibernate:
+          ddl-auto: update
+
+      kafka:
+        bootstrap-servers: kafka:9092,kafka2:9092,kafka3:9092
+        producer:
+          key-serializer: org.apache.kafka.common.serialization.StringSerializer
+          value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+      rabbitmq:
+        host: rabbitmq
+        port: 5672
+        username: guest
+        password: guest
+
+      security:
+        oauth2:
+          resourceserver:
+            jwt:
+              issuer-uri: https://login.microsoftonline.com/${TENANT_ID}/v2.0
+
+    campuslab:
+      kafka:
+        topic-events: bookings.events
+      rabbit:
+        exchange-direct: cmd.direct
+        exchange-topic: cmd.topic
