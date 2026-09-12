@@ -1,42 +1,43 @@
+server:
+  port: 8081
+
 spring:
   application:
     name: ms-campuslab-bookings
 
-    server:
-      port: 8081
+  datasource:
+    url: jdbc:mysql://localhost:3306/bookings_db?useSSL=false&serverTimezone=UTC
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
-    spring:
-      datasource:
-        url: jdbc:oracle:thin:@//oracle-db:1521/XEPDB1
-        username: bookings_user
-        password: ${DB_PASSWORD}
-        driver-class-name: oracle.jdbc.OracleDriver
-      jpa:
-        database-platform: org.hibernate.dialect.OracleDialect
-        hibernate:
-          ddl-auto: update
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQLDialect
 
-      kafka:
-        bootstrap-servers: kafka:9092,kafka2:9092,kafka3:9092
-        producer:
-          key-serializer: org.apache.kafka.common.serialization.StringSerializer
-          value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
-      rabbitmq:
-        host: rabbitmq
-        port: 5672
-        username: guest
-        password: guest
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
 
-      security:
-        oauth2:
-          resourceserver:
-            jwt:
-              issuer-uri: https://login.microsoftonline.com/${TENANT_ID}/v2.0
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://login.microsoftonline.com/${TENANT_ID:00000000-0000-0000-0000-000000000000}/v2.0
 
-    campuslab:
-      kafka:
-        topic-events: bookings.events
-      rabbit:
-        exchange-direct: cmd.direct
-        exchange-topic: cmd.topic
+campuslab:
+  kafka:
+    topic-events: bookings.events
+  rabbit:
+    exchange-direct: cmd.direct
+    exchange-topic: cmd.topic
