@@ -16,7 +16,7 @@
 	<description>Microservicio de reservas de CampusLab - productor Kafka y RabbitMQ</description>
 
 	<properties>
-		<java.version>21</java.version>
+		<java.version>25</java.version>
 	</properties>
 
 	<dependencies>
