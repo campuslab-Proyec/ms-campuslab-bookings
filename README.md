@@ -40,3 +40,60 @@ Puerto por defecto: **8081**
 | `GET` | `/api/bookings?status=&from=&to=` | Busca reservas con filtros opcionales |
 
 ### Estados válidos (`BookingStatus`)
+
+
+### Ejemplo: crear una reserva
+
+```http
+POST /api/bookings
+Content-Type: application/json
+
+{
+  "resourceId": "LAB-01",
+  "studentId": "STU-123",
+  "from": "2026-09-20T10:00:00",
+  "to": "2026-09-20T12:00:00"
+}
+```
+
+### Ejemplo: cambiar estado
+
+```http
+PUT /api/bookings/1/status
+Content-Type: application/json
+
+{
+  "status": "APROBADA"
+}
+```
+
+## Flujo interno al cambiar de estado
+
+1. Se actualiza el registro en MySQL.
+2. Se publica un evento a RabbitMQ (`cmd.direct` → cola `notify.booking.queue`) para que `notify` envíe la notificación correspondiente.
+3. Se llama a `POST /api/audit/events` en `ms-campuslab-audit` para dejar constancia de quién hizo el cambio.
+
+## Cómo correr localmente
+
+```bash
+mvn spring-boot:run
+```
+
+Requiere MySQL y RabbitMQ corriendo (ver `/infra` para levantarlos con Docker Compose).
+
+## Cómo correr con Docker
+
+```bash
+docker build -t ms-campuslab-bookings .
+docker run -p 8081:8081 ms-campuslab-bookings
+```
+
+O como parte del stack completo desde `/infra`:
+
+```bash
+docker compose up --build
+```
+
+## Seguridad
+
+Todos los endpoints (excepto `/actuator/health`) requieren un JWT válido emitido por Azure AD en el header:
