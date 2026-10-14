@@ -18,7 +18,7 @@ import java.util.List;
 public class BookingController {
 
     private final BookingService service;
-
+    
     @PostMapping
     public ResponseEntity<Booking> create(@Valid @RequestBody BookingRequest req) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(req));
