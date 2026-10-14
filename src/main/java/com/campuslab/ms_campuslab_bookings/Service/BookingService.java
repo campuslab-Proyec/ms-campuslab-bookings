@@ -3,6 +3,8 @@ package com.campuslab.ms_campuslab_bookings.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BookingService {
 
+    private static final Logger log = LoggerFactory.getLogger(BookingService.class);
+
     private final BookingRepository repository;
     private final BookingEventPublisher eventPublisher;
     private final AuditClient auditClient;
@@ -36,7 +40,7 @@ public class BookingService {
 
         Booking saved = repository.save(booking);
 
-        auditClient.registerEvent(saved, "SOLICITADA", currentUser(), currentRole());
+        registerAudit(saved, "SOLICITADA");
         return saved;
     }
 
@@ -52,7 +56,7 @@ public class BookingService {
         Booking updated = repository.save(booking);
 
         eventPublisher.publishStatusChanged(updated);
-        auditClient.registerEvent(updated, newStatus.name(), currentUser(), currentRole());
+        registerAudit(updated, newStatus.name());
 
         return updated;
     }
@@ -64,13 +68,34 @@ public class BookingService {
         return repository.search(statusEnum, fromDate, toDate);
     }
 
-    private String currentUser() {
-        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    /**
+     * Registra el evento de auditoría reenviando el JWT del usuario. La auditoría es best-effort:
+     * si el servicio de audit falla, se registra el error pero no se revierte la reserva.
+     */
+    private void registerAudit(Booking booking, String action) {
+        Jwt jwt = currentJwt();
+        try {
+            auditClient.registerEvent(booking, action, currentUser(jwt), currentRole(jwt), jwt.getTokenValue());
+        } catch (Exception e) {
+            log.warn("No se pudo registrar el evento de auditoría para la reserva {}: {}",
+                    booking.getId(), e.getMessage());
+        }
+    }
+
+    private Jwt currentJwt() {
+        return (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
+    private String currentUser(Jwt jwt) {
         return jwt.getSubject();
     }
 
-    private String currentRole() {
-        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return jwt.getClaimAsString("roles");
+    private String currentRole(Jwt jwt) {
+        // En Entra ID el claim "roles" es un array; getClaimAsString devolvería null.
+        List<String> roles = jwt.getClaimAsStringList("roles");
+        if (roles != null && !roles.isEmpty()) {
+            return String.join(",", roles);
+        }
+        return "UNKNOWN";
     }
 }
