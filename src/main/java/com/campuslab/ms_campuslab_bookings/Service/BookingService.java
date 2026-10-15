@@ -31,6 +31,10 @@ public class BookingService {
 
     @Transactional
     public Booking create(BookingRequest req) {
+        if (!req.getFrom().isBefore(req.getTo())) {
+            throw new IllegalArgumentException("La fecha de inicio debe ser anterior a la fecha de término");
+        }
+
         Booking booking = new Booking();
         booking.setResourceId(req.getResourceId());
         booking.setStudentId(req.getStudentId());

@@ -33,6 +33,10 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: https://login.microsoftonline.com/${AZURE_TENANT_ID:aff2eb38-d6cf-4220-8527-53f1cb6aed15}/v2.0
+          # El BFF reenvía el token del usuario, emitido para la API ms-campuslab-bff
+          audiences:
+            - 8d19bb45-1842-43ce-b76c-4513b979df81
+            - api://8d19bb45-1842-43ce-b76c-4513b979df81
 
 audit:
   service:
