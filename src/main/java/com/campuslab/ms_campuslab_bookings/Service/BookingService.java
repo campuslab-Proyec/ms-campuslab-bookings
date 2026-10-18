@@ -56,6 +56,10 @@ public class BookingService {
     @Transactional
     public Booking updateStatus(Long id, BookingStatus newStatus) {
         Booking booking = findById(id);
+        if (!booking.getStatus().canTransitionTo(newStatus)) {
+            throw new IllegalStateException("No se puede pasar una reserva de " + booking.getStatus()
+                    + " a " + newStatus + ". Estados permitidos: " + booking.getStatus().nextStatuses());
+        }
         booking.setStatus(newStatus);
         Booking updated = repository.save(booking);
 
