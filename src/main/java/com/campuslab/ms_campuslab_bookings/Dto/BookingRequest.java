@@ -12,17 +12,17 @@ import java.time.LocalDateTime;
 @Setter
 public class BookingRequest {
 
-    @NotBlank
+    @NotBlank(message = "Selecciona un laboratorio o recurso")
     private String resourceId;
 
-    @NotBlank
+    @NotBlank(message = "Indica el estudiante")
     private String studentId;
 
-    @NotNull
-    @Future
+    @NotNull(message = "Indica la fecha de inicio")
+    @Future(message = "La fecha de inicio debe ser futura")
     private LocalDateTime from;
 
-    @NotNull
-    @Future
+    @NotNull(message = "Indica la fecha de término")
+    @Future(message = "La fecha de término debe ser futura")
     private LocalDateTime to;
 }
