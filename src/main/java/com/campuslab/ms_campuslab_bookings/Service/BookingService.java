@@ -44,6 +44,7 @@ public class BookingService {
 
         Booking saved = repository.save(booking);
 
+        eventPublisher.publishStatusChanged(saved);   // booking.solicitada
         registerAudit(saved, "SOLICITADA");
         return saved;
     }

@@ -30,9 +30,10 @@ public class BookingEventPublisher {
                 )
         );
 
+        // Topic exchange: routing key booking.<estado> (ver RabbitMQConfig)
         rabbitTemplate.convertAndSend(
-                RabbitMQConfig.EXCHANGE_DIRECT,
-                RabbitMQConfig.ROUTING_KEY_NOTIFY,
+                RabbitMQConfig.EXCHANGE_BOOKING_EVENTS,
+                RabbitMQConfig.routingKeyFor(booking.getStatus()),
                 envelope
         );
     }
