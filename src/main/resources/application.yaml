@@ -28,6 +28,16 @@ spring:
     username: guest
     password: guest
 
+    kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      acks: all
+      properties:
+        enable.idempotence: true
+        max.block.ms: 3000
+        request.timeout.ms: 5000
+        delivery.timeout.ms: 10000
+        
   security:
     oauth2:
       resourceserver:
